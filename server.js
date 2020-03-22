@@ -20,15 +20,15 @@ app.get("/", function (req, res) {
 
 
 app.get("/api/timestamp/:date_string?", function (req, res) {
-  var date_string = req.params.date_string;
+  const date_string = req.params.date_string;
 
+  // If the date string is empty it should be equivalent to trigger new Date(),
+  // i.e. the service uses the current timestamp.
   if (date_string == undefined) {
-    // If the date string is empty it should be equivalent to trigger new Date(),
-    // i.e. the service uses the current timestamp.
-    var date = new Date();
+    const date = new Date();
 
-    var unix = date.getTime()
-    var utc = date.toUTCString()
+    const unix = date.getTime()
+    const utc = date.toUTCString()
 
     res.json({
       unix: unix,
@@ -38,7 +38,21 @@ app.get("/api/timestamp/:date_string?", function (req, res) {
     return
   }
 
-  var date = new Date(date_string);
+  // Regex for digits
+  const numbers = /^\d+$/;
+
+  var date = new Date();
+
+  if (date_string.match(numbers)) {
+    // Parse non-empty string to int (assumes it is Unix time)
+    var date_int = parseInt(date_string, 10)
+    date = new Date(date_int);
+
+  } else {
+    // Parse non-empty string
+    date = new Date(date_string);
+  }
+
 
   if (date == "Invalid Date") {
     res.json({
@@ -48,8 +62,10 @@ app.get("/api/timestamp/:date_string?", function (req, res) {
     return
   }
 
-  var unix = date.getTime();
-  var utc = date.toUTCString()
+  // handle a valid date, and return the correct unix timestamp
+  const unix = date.getTime();
+  // handle a valid date, and return the correct UTC string
+  const utc = date.toUTCString()
 
   res.json({
     unix: unix,
